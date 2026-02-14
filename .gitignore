@@ -1,0 +1,24 @@
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Generic build artifacts
+dist/
+out/
+bin/
+*.log
+
+# Compiled outputs
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe

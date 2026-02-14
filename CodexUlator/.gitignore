@@ -1,0 +1,16 @@
+# CMake build directories
+build/
+build-*/
+CMakeFiles/
+
+# CMake generated files
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+
+# Local binaries generated in project root
+secure_calc
+secure_calc.exe
