@@ -36,41 +36,67 @@ pkg-config --modversion fltk || echo "FLTK not found"
 ### Windows (PowerShell)
 ```powershell
 cmake --version
+ninja --version
 cl
-# or
-mingw32-g++ --version
+if ($LASTEXITCODE -ne 0) { "MSVC compiler not detected in this shell" }
+vcpkg version
 ```
-For FLTK with vcpkg:
+Check FLTK package:
 ```powershell
-vcpkg list | findstr fltk
+vcpkg list | Select-String fltk
 ```
 
 ## Install Dependencies
 
 ### Linux (Debian/Ubuntu)
+Run from any directory:
 ```bash
 sudo apt-get update
 sudo apt-get install -y cmake g++ libfltk1.3-dev pkg-config
 ```
 
 ### Linux (Fedora)
+Run from any directory:
 ```bash
 sudo dnf install -y cmake gcc-c++ fltk-devel pkgconf-pkg-config
 ```
 
-### Windows
-1. Install Visual Studio Build Tools (or MinGW-w64).
-2. Install CMake: https://cmake.org/download/
-3. Install vcpkg: https://learn.microsoft.com/vcpkg/get_started/get-started
-4. Install FLTK:
+### Windows (PowerShell, command-only)
+Run from any directory:
+
+Install required tools with `winget`:
 ```powershell
-vcpkg install fltk
+winget install --id Microsoft.VisualStudio.2022.BuildTools --exact --source winget --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+winget install --id Kitware.CMake --exact --source winget
+winget install --id Ninja-build.Ninja --exact --source winget
+winget install --id Git.Git --exact --source winget
 ```
+
+Restart PowerShell after installs complete, then bootstrap `vcpkg`:
+```powershell
+Set-Location $HOME
+git clone https://github.com/microsoft/vcpkg.git $HOME\vcpkg
+& $HOME\vcpkg\bootstrap-vcpkg.bat
+$env:PATH = "$HOME\vcpkg;$env:PATH"
+```
+
+Install FLTK via `vcpkg`:
+```powershell
+Set-Location $HOME\vcpkg
+vcpkg install fltk:x64-windows
+```
+
+Optional: persist `vcpkg` in your user PATH:
+```powershell
+[Environment]::SetEnvironmentVariable("Path", $env:Path + ";$HOME\vcpkg", "User")
+```
+
+Open **x64 Native Tools Command Prompt for VS 2022** or **Developer PowerShell for VS 2022** before building with MSVC.
 
 ## Build and Run
 
 ### Linux
-From repo root:
+Run from repo root (`LingMoldyEnterprises/`):
 ```bash
 cmake -S CodexUlator -B CodexUlator/build -DCMAKE_BUILD_TYPE=Release
 cmake --build CodexUlator/build -j
@@ -78,8 +104,9 @@ cmake --build CodexUlator/build -j
 ```
 
 ### Windows (MSVC + Ninja)
-From repo root:
+Run from repo root (`LingMoldyEnterprises/`) in **Developer PowerShell for VS 2022**:
 ```powershell
+Set-Location <path-to>\LingMoldyEnterprises
 cmake -S CodexUlator -B CodexUlator/build -G "Ninja" -DCMAKE_BUILD_TYPE=Release
 cmake --build CodexUlator/build
 .\CodexUlator\build\secure_calc.exe
@@ -87,15 +114,17 @@ cmake --build CodexUlator/build
 
 If using vcpkg, add your toolchain file:
 ```powershell
+Set-Location <path-to>\LingMoldyEnterprises
 cmake -S CodexUlator -B CodexUlator/build -G "Ninja" `
-  -DCMAKE_TOOLCHAIN_FILE=C:/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake `
+  -DCMAKE_TOOLCHAIN_FILE="$HOME/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+  -DVCPKG_TARGET_TRIPLET=x64-windows `
   -DCMAKE_BUILD_TYPE=Release
 ```
 
 ## Cross-Compile (Linux -> Windows with MinGW-w64)
 Install MinGW-w64 and ensure Windows-target FLTK is available to that toolchain.
 
-From repo root:
+Run from repo root (`LingMoldyEnterprises/`):
 ```bash
 cmake -S CodexUlator -B CodexUlator/build-win \
   -DCMAKE_TOOLCHAIN_FILE=CodexUlator/cmake/toolchains/mingw-w64.cmake \
