@@ -74,21 +74,23 @@ winget install --id Git.Git --exact --source winget
 
 Restart PowerShell after installs complete, then bootstrap `vcpkg`:
 ```powershell
-Set-Location $HOME
-git clone https://github.com/microsoft/vcpkg.git $HOME\vcpkg
-& $HOME\vcpkg\bootstrap-vcpkg.bat
-$env:PATH = "$HOME\vcpkg;$env:PATH"
+Set-Location C:\
+git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+& C:\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+$env:VCPKG_ROOT = "C:\vcpkg"
+$env:PATH = "C:\vcpkg;$env:PATH"
 ```
 
 Install FLTK via `vcpkg`:
 ```powershell
-Set-Location $HOME\vcpkg
+Set-Location C:\vcpkg
 vcpkg install fltk:x64-windows
 ```
 
 Optional: persist `vcpkg` in your user PATH:
 ```powershell
-[Environment]::SetEnvironmentVariable("Path", $env:Path + ";$HOME\vcpkg", "User")
+[Environment]::SetEnvironmentVariable("VCPKG_ROOT", "C:\vcpkg", "User")
+[Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\vcpkg", "User")
 ```
 
 Open **x64 Native Tools Command Prompt for VS 2022** or **Developer PowerShell for VS 2022** before building with MSVC.
@@ -116,9 +118,18 @@ If using vcpkg, add your toolchain file:
 ```powershell
 Set-Location <path-to>\LingMoldyEnterprises
 cmake -S CodexUlator -B CodexUlator/build -G "Ninja" `
-  -DCMAKE_TOOLCHAIN_FILE="$HOME/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+  -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" `
   -DVCPKG_TARGET_TRIPLET=x64-windows `
   -DCMAKE_BUILD_TYPE=Release
+```
+
+### Windows Troubleshooting
+If you previously configured with a different generator (for example `Ninja` then `Visual Studio`), use a new build folder:
+```powershell
+cmake -S CodexUlator -B CodexUlator/build-vs -G "Visual Studio 17 2022" -A x64 `
+  -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+  -DVCPKG_TARGET_TRIPLET=x64-windows
+cmake --build CodexUlator/build-vs --config Release
 ```
 
 ## Cross-Compile (Linux -> Windows with MinGW-w64)
