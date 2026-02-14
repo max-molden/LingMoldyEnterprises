@@ -9,3 +9,4 @@
 7. After PR merge/close, ensure feature branches are cleaned up (remote auto-delete plus local cleanup).
 8. Do not install packages; tell the user exactly what to install instead.
 9. When switching back to `Development` (or finishing/closing a feature branch), always fetch and fast-forward/pull `Development` so future branches start from the latest base.
+10. After creating a PR, always enable auto-merge on that PR (use `gh pr merge --auto` with the standard merge method for this repo).
