@@ -22,3 +22,6 @@ bin/
 *.dylib
 *.dll
 *.exe
+
+# SSH key directories
+**/.ssh/
