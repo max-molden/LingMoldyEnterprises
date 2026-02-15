@@ -11,3 +11,7 @@
 9. Do not install packages; tell the user exactly what to install instead.
 10. When switching back to `Development` (or finishing/closing a feature branch), always fetch and fast-forward/pull `Development` so future branches start from the latest base.
 11. After creating a PR, always enable auto-merge on that PR (use `gh pr merge --auto` with the standard merge method for this repo).
+12. Never merge work directly into local `Development`; all merges to `Development` must go through a PR.
+13. `max-molden` is the sole approver for this repo and the only person who can approve changes that land on `Development`.
+14. Configure each PR so it completes automatically after required checks and approval, with remote branch auto-deletion enabled.
+15. At the start of the next work session, if a local feature branch is already merged/closed ("dead"), delete the local branch during cleanup.
