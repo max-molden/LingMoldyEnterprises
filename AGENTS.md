@@ -15,3 +15,4 @@
 13. `max-molden` is the sole approver for this repo and the only person who can approve changes that land on `Development`.
 14. Configure each PR so it completes automatically after required checks and approval, with remote branch auto-deletion enabled.
 15. At the start of the next work session, if a local feature branch is already merged/closed ("dead"), delete the local branch during cleanup.
+16. If the user says work is an entirely new project, create it in a new folder; if there is any uncertainty, ask the user to confirm before proceeding.
