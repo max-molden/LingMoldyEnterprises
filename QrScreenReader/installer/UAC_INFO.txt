@@ -1,0 +1,22 @@
+QR Screen Reader installer actions
+
+This installer requests elevated permissions (UAC) because it installs to Program Files.
+
+What this installer does:
+- Copies app files to: {autopf}\QRScreenReader
+- Creates Start Menu shortcuts
+- Optionally creates a desktop shortcut
+- Optionally creates a Startup shortcut for the global hotkey launcher
+
+What the optional global hotkey launcher does:
+- Runs QRScreenReader.exe --hotkey-daemon at sign-in
+- Registers the configured global hotkey (default Win+Shift+Q)
+- Launches snip mode when the hotkey is pressed
+
+What this installer does NOT do:
+- Does not install browser extensions
+- Does not modify proxy, firewall, or security policy
+- Does not install kernel drivers or services
+
+You can disable the global hotkey launcher later by removing the startup shortcut
+or disabling the global hotkey in app settings.

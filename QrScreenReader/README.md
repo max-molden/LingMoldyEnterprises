@@ -26,7 +26,7 @@ After install, app launch is supported by:
 - Direct executable launch: `QRScreenReader.exe`
 - Command line launch with arguments
 
-No auto-start at sign-in is configured by the installer.
+Installer can optionally add a startup launcher for global hotkey support.
 
 ## Project Layout
 
@@ -93,6 +93,7 @@ run_dev.bat --mode snip
 --disable-tray           Disable tray icon and quit on window close
 --disable-hotkey         Disable global hotkey for this run
 --hotkey COMBO           Override hotkey for this run (e.g., Win+Shift+Q)
+--hotkey-daemon          Background launcher mode for global hotkey
 ```
 
 ## Build Windows Executable
@@ -122,7 +123,19 @@ Installer behavior:
 - Creates Start Menu shortcut for normal launch.
 - Creates Start Menu shortcut for snip mode launch.
 - Optional desktop shortcut.
-- No startup-at-sign-in task.
+- Optional global hotkey launcher task:
+  - Creates Startup shortcut: `QRScreenReader.exe --hotkey-daemon`
+  - Starts background hotkey listener after install
+
+## Installer UAC / Elevation
+
+Installer requests UAC elevation because it installs to `Program Files`.
+
+The installer includes an information page (`installer/UAC_INFO.txt`) that explains:
+
+- Exactly what files/shortcuts are created
+- What the optional global hotkey launcher does
+- What is not modified (no drivers/services/firewall/proxy changes)
 
 ## GitHub Downloadable Installer
 
@@ -148,7 +161,7 @@ To let users download the installer directly from GitHub:
   - Use the installer output, not a partial folder copy.
   - Rebuild on a clean Windows machine/VM and test install/uninstall.
 - Global hotkey does not trigger:
-  - Ensure app is currently running.
+  - Ensure app is running, or enable the installer's global hotkey launcher task.
   - Check app setting for enabled hotkey and valid combination.
   - Another app may already own the same hotkey.
 - QR does not decode from snip:
@@ -157,4 +170,5 @@ To let users download the installer directly from GitHub:
 ## Notes
 
 - Safety checks are heuristic only, not a full security scanner.
-- `Win+Shift+Q` cannot launch the app if it is not already running; that hotkey is for in-app global capture once running.
+- `Win+Shift+Q` cannot trigger anything if neither the app nor the hotkey launcher is running.
+- With the optional global hotkey launcher task enabled, `Win+Shift+Q` works even when the main window is closed because a background launcher process remains running.
