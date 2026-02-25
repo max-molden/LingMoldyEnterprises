@@ -23,7 +23,6 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop icon"; GroupDescription: "Additional icons:";
-Name: "startup"; Description: "Launch at Windows sign-in (recommended for global hotkey Win+Shift+Q)"; GroupDescription: "Startup:";
 
 [Files]
 Source: "..\\dist\\QRScreenReader\\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
@@ -32,9 +31,6 @@ Source: "..\\dist\\QRScreenReader\\*"; DestDir: "{app}"; Flags: recursesubdirs i
 Name: "{autoprograms}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"
 Name: "{autoprograms}\\{#MyAppName} (Snip Mode)"; Filename: "{app}\\{#MyAppExeName}"; Parameters: "--mode snip"
 Name: "{autodesktop}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; Tasks: desktopicon
-
-[Registry]
-Root: HKCU; Subkey: "Software\\Microsoft\\Windows\\CurrentVersion\\Run"; ValueType: string; ValueName: "QRScreenReader"; ValueData: "\"{app}\\{#MyAppExeName}\""; Flags: uninsdeletevalue; Tasks: startup
 
 [Run]
 Filename: "{app}\\{#MyAppExeName}"; Description: "Launch {#MyAppName}"; Flags: nowait postinstall skipifsilent

@@ -4,7 +4,7 @@ Desktop app to scan QR codes from a selected screen region.
 
 ## Features
 
-- Global hotkey (configurable): default `Win+Shift+Q`.
+- Global hotkey while app is running (configurable): default `Win+Shift+Q`.
 - Snip overlay workflow similar to `Win+Shift+S`.
 - Direct launch mode with `--mode snip` (or `--snip`) to immediately start selecting a region.
 - Decodes QR from snips or image files.
@@ -16,6 +16,17 @@ Desktop app to scan QR codes from a selected screen region.
   - Enable/disable global hotkey
   - Change hotkey combination
 - GUI includes explicit `Copy` and `Open` buttons.
+
+## Launch Methods
+
+After install, app launch is supported by:
+
+- Start Menu shortcut
+- Desktop shortcut (if selected during install)
+- Direct executable launch: `QRScreenReader.exe`
+- Command line launch with arguments
+
+No auto-start at sign-in is configured by the installer.
 
 ## Project Layout
 
@@ -29,9 +40,31 @@ Desktop app to scan QR codes from a selected screen region.
 - `build_exe.bat`: pyinstaller build command
 - `installer/QRScreenReader.iss`: Inno Setup installer script
 
+## Build Safely (Recommended)
+
+Use a dedicated Python virtual environment for this project. It is not strictly required, but it prevents dependency conflicts with other Python projects and keeps your global Python clean.
+
 ## Install Dependencies (Windows)
 
-Run these commands in PowerShell or cmd from this project directory:
+### Option A: Recommended (venv)
+
+From the `QrScreenReader` folder in PowerShell:
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install pyinstaller
+```
+
+For `cmd.exe` activation:
+
+```bat
+.venv\Scripts\activate.bat
+```
+
+### Option B: Global install (not recommended)
 
 ```bat
 python -m pip install --upgrade pip
@@ -64,11 +97,15 @@ run_dev.bat --mode snip
 
 ## Build Windows Executable
 
+From `QrScreenReader` folder:
+
 ```bat
 build_exe.bat
 ```
 
-Output: `dist\\QRScreenReader\\QRScreenReader.exe`
+Output:
+
+- `dist\\QRScreenReader\\QRScreenReader.exe`
 
 ## Build Installer (Inno Setup)
 
@@ -76,18 +113,16 @@ Output: `dist\\QRScreenReader\\QRScreenReader.exe`
 2. Open `installer/QRScreenReader.iss` in Inno Setup Compiler.
 3. Build the script.
 
-Output installer: `installer\\QRScreenReaderInstaller.exe`
+Output installer:
+
+- `installer\\QRScreenReaderInstaller.exe`
 
 Installer behavior:
 
 - Creates Start Menu shortcut for normal launch.
 - Creates Start Menu shortcut for snip mode launch.
 - Optional desktop shortcut.
-- Optional startup entry (`HKCU\\...\\Run`) so app starts at sign-in.
-
-## Important Hotkey Note
-
-Windows does not provide a native per-app `Win+Shift+Q` launch binding when the app is not running. This project achieves global hotkey behavior by running in the background (tray). Enabling startup in installer keeps the app running after sign-in so `Win+Shift+Q` works system-wide.
+- No startup-at-sign-in task.
 
 ## GitHub Downloadable Installer
 
@@ -95,8 +130,31 @@ To let users download the installer directly from GitHub:
 
 1. Build `dist\\QRScreenReader` with PyInstaller.
 2. Build `installer\\QRScreenReaderInstaller.exe` with Inno Setup.
-3. Create a GitHub Release and upload `QRScreenReaderInstaller.exe` as a release asset.
+3. Create a GitHub Release.
+4. Upload `QRScreenReaderInstaller.exe` as a release asset.
+
+## Troubleshooting
+
+- `python` or `py` not found:
+  - Install Python 3.11+ and check "Add Python to PATH" during install.
+  - Reopen terminal and run `py --version`.
+- PowerShell blocks venv activation:
+  - Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then reopen PowerShell.
+- `ModuleNotFoundError` when running app:
+  - Activate your venv and reinstall deps with `python -m pip install -r requirements.txt`.
+- `pyinstaller` command not found:
+  - Run `python -m pip install pyinstaller` in the same environment.
+- Build succeeds but app fails on another machine:
+  - Use the installer output, not a partial folder copy.
+  - Rebuild on a clean Windows machine/VM and test install/uninstall.
+- Global hotkey does not trigger:
+  - Ensure app is currently running.
+  - Check app setting for enabled hotkey and valid combination.
+  - Another app may already own the same hotkey.
+- QR does not decode from snip:
+  - Try a tighter snip, higher zoom, or decode from saved image file.
 
 ## Notes
 
 - Safety checks are heuristic only, not a full security scanner.
+- `Win+Shift+Q` cannot launch the app if it is not already running; that hotkey is for in-app global capture once running.
