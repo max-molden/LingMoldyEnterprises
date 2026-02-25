@@ -2,10 +2,21 @@
 
 Desktop app to scan QR codes from a selected screen region.
 
+## End-User Quick Start (2-3 minutes)
+
+1. Download `QRScreenReaderInstaller.exe` from the GitHub Release assets.
+2. Run installer and accept UAC prompt.
+3. Keep "Enable always-on native global hotkey launcher" checked if you want `Win+Shift+Q` to work system-wide after sign-in.
+4. Finish install.
+
+No Python/CMake/dev tools are needed for end users.
+
 ## Features
 
-- Global hotkey while app is running (configurable): default `Win+Shift+Q`.
 - Snip overlay workflow similar to `Win+Shift+S`.
+- Global hotkey support (`Win+Shift+Q` by default):
+  - In-app hotkey when app is running.
+  - Optional always-on native helper for system-wide hotkey availability.
 - Direct launch mode with `--mode snip` (or `--snip`) to immediately start selecting a region.
 - Decodes QR from snips or image files.
 - Configurable behavior stored in `%APPDATA%\\QrScreenReader\\config.json` and editable in the GUI:
@@ -13,60 +24,49 @@ Desktop app to scan QR codes from a selected screen region.
   - Auto-open decoded link (default: off)
   - Safety checks for suspicious links (default: on)
   - Browser mode: system default or custom browser executable path
-  - Enable/disable global hotkey
-  - Change hotkey combination
+  - Enable/disable global hotkey and change combination
 - GUI includes explicit `Copy` and `Open` buttons.
 
 ## Launch Methods
-
-After install, app launch is supported by:
 
 - Start Menu shortcut
 - Desktop shortcut (if selected during install)
 - Direct executable launch: `QRScreenReader.exe`
 - Command line launch with arguments
 
-Installer can optionally add a startup launcher for global hotkey support.
-
 ## Project Layout
 
 - `app/main.py`: app entrypoint and CLI arguments
 - `app/ui_main.py`: main UI and behavior wiring
 - `app/snip_overlay.py`: area selection overlay
-- `app/hotkey.py`: global hotkey registration and parsing
+- `app/hotkey.py`: in-app global hotkey registration
+- `app/win_integration.py`: native helper integration hooks
 - `app/qr_decode.py`: QR detection/decoding
 - `app/safety.py`: suspicious-link checks
 - `app/config.py`: config load/save
-- `build_exe.bat`: pyinstaller build command
+- `native_helper/QRHotkeyHelper.cpp`: native always-on hotkey helper
+- `build_exe.bat`: build Python app + native helper
+- `build_helper.bat`: build native helper only
 - `installer/QRScreenReader.iss`: Inno Setup installer script
 
-## Build Safely (Recommended)
+## Build Safely (Developer)
 
-Use a dedicated Python virtual environment for this project. It is not strictly required, but it prevents dependency conflicts with other Python projects and keeps your global Python clean.
+Use a dedicated virtual environment.
 
-## Install Dependencies (Windows)
+### Build Dependencies (Windows)
 
-### Option A: Recommended (venv)
+1. Python 3.11+
+2. CMake 3.16+
+3. Visual Studio Build Tools 2022 (Desktop development with C++)
+4. Inno Setup 6
 
-From the `QrScreenReader` folder in PowerShell:
+### Python Dependencies
+
+From `QrScreenReader` folder:
 
 ```powershell
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m pip install pyinstaller
-```
-
-For `cmd.exe` activation:
-
-```bat
-.venv\Scripts\activate.bat
-```
-
-### Option B: Global install (not recommended)
-
-```bat
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python -m pip install pyinstaller
@@ -91,12 +91,11 @@ run_dev.bat --mode snip
 --snip                   Alias for --mode snip
 --decode-file PATH       Decode a local image after launch
 --disable-tray           Disable tray icon and quit on window close
---disable-hotkey         Disable global hotkey for this run
+--disable-hotkey         Disable the in-app global hotkey for this run
 --hotkey COMBO           Override hotkey for this run (e.g., Win+Shift+Q)
---hotkey-daemon          Background launcher mode for global hotkey
 ```
 
-## Build Windows Executable
+## Build Windows Executable Bundle
 
 From `QrScreenReader` folder:
 
@@ -104,17 +103,17 @@ From `QrScreenReader` folder:
 build_exe.bat
 ```
 
-Output:
+This builds:
 
 - `dist\\QRScreenReader\\QRScreenReader.exe`
+- `dist\\QRScreenReader\\QRHotkeyHelper.exe`
 
-## Build Installer (Inno Setup)
+## Build Installer
 
-1. Install Inno Setup 6.
-2. Open `installer/QRScreenReader.iss` in Inno Setup Compiler.
-3. Build the script.
+1. Open `installer/QRScreenReader.iss` in Inno Setup Compiler.
+2. Build.
 
-Output installer:
+Output:
 
 - `installer\\QRScreenReaderInstaller.exe`
 
@@ -123,52 +122,44 @@ Installer behavior:
 - Creates Start Menu shortcut for normal launch.
 - Creates Start Menu shortcut for snip mode launch.
 - Optional desktop shortcut.
-- Optional global hotkey launcher task:
-  - Creates Startup shortcut: `QRScreenReader.exe --hotkey-daemon`
-  - Starts background hotkey listener after install
+- Optional Startup shortcut for native helper (`QRHotkeyHelper.exe`).
 
 ## Installer UAC / Elevation
 
 Installer requests UAC elevation because it installs to `Program Files`.
 
-The installer includes an information page (`installer/UAC_INFO.txt`) that explains:
+The installer shows `installer/UAC_INFO.txt` before installation, explaining:
 
-- Exactly what files/shortcuts are created
-- What the optional global hotkey launcher does
+- Exactly which files/shortcuts are created
+- What the native helper does
 - What is not modified (no drivers/services/firewall/proxy changes)
 
-## GitHub Downloadable Installer
+## GitHub Release for Fast Installs
 
-To let users download the installer directly from GitHub:
+To let users install in minutes:
 
-1. Build `dist\\QRScreenReader` with PyInstaller.
-2. Build `installer\\QRScreenReaderInstaller.exe` with Inno Setup.
+1. Build executable bundle with `build_exe.bat`.
+2. Build installer from `installer/QRScreenReader.iss`.
 3. Create a GitHub Release.
 4. Upload `QRScreenReaderInstaller.exe` as a release asset.
 
 ## Troubleshooting
 
-- `python` or `py` not found:
-  - Install Python 3.11+ and check "Add Python to PATH" during install.
-  - Reopen terminal and run `py --version`.
+- `py` or `python` not found:
+  - Install Python 3.11+ with PATH enabled, reopen terminal.
 - PowerShell blocks venv activation:
-  - Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then reopen PowerShell.
-- `ModuleNotFoundError` when running app:
-  - Activate your venv and reinstall deps with `python -m pip install -r requirements.txt`.
-- `pyinstaller` command not found:
-  - Run `python -m pip install pyinstaller` in the same environment.
-- Build succeeds but app fails on another machine:
-  - Use the installer output, not a partial folder copy.
-  - Rebuild on a clean Windows machine/VM and test install/uninstall.
-- Global hotkey does not trigger:
-  - Ensure app is running, or enable the installer's global hotkey launcher task.
-  - Check app setting for enabled hotkey and valid combination.
-  - Another app may already own the same hotkey.
-- QR does not decode from snip:
-  - Try a tighter snip, higher zoom, or decode from saved image file.
+  - Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once.
+- `cmake` not found:
+  - Install CMake and reopen terminal.
+- Native helper build fails with missing compiler:
+  - Install Visual Studio Build Tools 2022 + C++ workload.
+- Installer builds but global hotkey does not work after reboot:
+  - Re-run installer and enable "always-on native global hotkey launcher".
+  - Ensure no other app owns the same hotkey.
+- Hotkey changed in app settings but helper still uses old one:
+  - Open app settings and save again; app signals helper reload automatically.
 
 ## Notes
 
 - Safety checks are heuristic only, not a full security scanner.
-- `Win+Shift+Q` cannot trigger anything if neither the app nor the hotkey launcher is running.
-- With the optional global hotkey launcher task enabled, `Win+Shift+Q` works even when the main window is closed because a background launcher process remains running.
+- Global hotkey requires either app running or native helper running.

@@ -4,19 +4,23 @@ This installer requests elevated permissions (UAC) because it installs to Progra
 
 What this installer does:
 - Copies app files to: {autopf}\QRScreenReader
+- Installs bundled binaries, including:
+  - QRScreenReader.exe (main app)
+  - QRHotkeyHelper.exe (native global-hotkey helper)
 - Creates Start Menu shortcuts
 - Optionally creates a desktop shortcut
-- Optionally creates a Startup shortcut for the global hotkey launcher
+- Optionally creates a Startup shortcut for the native hotkey helper
 
-What the optional global hotkey launcher does:
-- Runs QRScreenReader.exe --hotkey-daemon at sign-in
+What the optional native hotkey helper does:
+- Runs QRHotkeyHelper.exe at sign-in
 - Registers the configured global hotkey (default Win+Shift+Q)
 - Launches snip mode when the hotkey is pressed
+- Waits for app setting changes and reloads hotkey without reboot
 
 What this installer does NOT do:
 - Does not install browser extensions
 - Does not modify proxy, firewall, or security policy
-- Does not install kernel drivers or services
+- Does not install kernel drivers or Windows services
 
-You can disable the global hotkey launcher later by removing the startup shortcut
-or disabling the global hotkey in app settings.
+You can disable always-on hotkey behavior by removing the Startup shortcut
+or by turning off global hotkey in app settings.

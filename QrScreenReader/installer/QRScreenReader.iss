@@ -25,17 +25,18 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop icon"; GroupDescription: "Additional icons:";
-Name: "globalhotkey"; Description: "Enable global hotkey launcher (Win+Shift+Q, starts in background)"; GroupDescription: "Global Hotkey:";
+Name: "globalhotkey"; Description: "Enable always-on native global hotkey launcher (Win+Shift+Q)"; GroupDescription: "Global Hotkey:";
 
 [Files]
 Source: "..\\dist\\QRScreenReader\\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
+Source: "..\\dist\\QRScreenReader\\QRHotkeyHelper.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"
 Name: "{autoprograms}\\{#MyAppName} (Snip Mode)"; Filename: "{app}\\{#MyAppExeName}"; Parameters: "--mode snip"
 Name: "{autodesktop}\\{#MyAppName}"; Filename: "{app}\\{#MyAppExeName}"; Tasks: desktopicon
-Name: "{userstartup}\\{#MyAppName} Hotkey Launcher"; Filename: "{app}\\{#MyAppExeName}"; Parameters: "--hotkey-daemon"; Tasks: globalhotkey
+Name: "{userstartup}\\{#MyAppName} Hotkey Launcher"; Filename: "{app}\\QRHotkeyHelper.exe"; Tasks: globalhotkey
 
 [Run]
-Filename: "{app}\\{#MyAppExeName}"; Parameters: "--hotkey-daemon"; Description: "Start global hotkey launcher in background"; Flags: nowait postinstall skipifsilent; Tasks: globalhotkey
+Filename: "{app}\\QRHotkeyHelper.exe"; Description: "Start native global hotkey launcher in background"; Flags: nowait postinstall skipifsilent; Tasks: globalhotkey
 Filename: "{app}\\{#MyAppExeName}"; Description: "Launch {#MyAppName}"; Flags: nowait postinstall skipifsilent

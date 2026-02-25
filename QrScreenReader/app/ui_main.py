@@ -32,6 +32,7 @@ from .hotkey import GlobalHotkeyListener, parse_hotkey
 from .qr_decode import decode_qr_from_qimage
 from .safety import analyze_url
 from .snip_overlay import SnipOverlay
+from .win_integration import is_hotkey_helper_running, signal_hotkey_helper_reload
 
 
 class MainWindow(QMainWindow):
@@ -51,6 +52,7 @@ class MainWindow(QMainWindow):
         self._tray_enabled = tray_enabled
         self._cli_hotkey_override = hotkey_override
         self._cli_disable_hotkey = disable_hotkey
+        self._helper_running = is_hotkey_helper_running()
 
         self.hotkey_listener = GlobalHotkeyListener(self._effective_hotkey())
         self.hotkey_listener.triggered.connect(self.start_snip_from_hotkey)
@@ -60,6 +62,10 @@ class MainWindow(QMainWindow):
         self._bind_values_from_config()
         self._build_tray_if_enabled()
         self._apply_hotkey_settings(show_errors=False)
+        if self._helper_running:
+            self.scan_notes.setPlainText(
+                "Native hotkey helper is running. Global hotkey is handled by helper process."
+            )
 
         if start_in_snip_mode:
             self.start_snip()
@@ -229,6 +235,8 @@ class MainWindow(QMainWindow):
         self.hotkey_listener.stop()
 
         if self._cli_disable_hotkey:
+            return
+        if self._helper_running:
             return
 
         if not self.hotkey_enabled_chk.isChecked():
@@ -405,6 +413,7 @@ class MainWindow(QMainWindow):
 
         self._refresh_snip_button_text()
         self._apply_hotkey_settings(show_errors=False)
+        helper_reloaded = signal_hotkey_helper_reload()
 
         if not self.safety_chk.isChecked():
             QMessageBox.warning(
@@ -412,6 +421,21 @@ class MainWindow(QMainWindow):
                 "Safety Disabled",
                 "Safety checks are OFF. Unsafe links may open without warnings.",
             )
+
+        if self._helper_running:
+            if helper_reloaded:
+                QMessageBox.information(
+                    self,
+                    "Saved",
+                    "Settings saved. Native hotkey helper reloaded your hotkey settings.",
+                )
+            else:
+                QMessageBox.information(
+                    self,
+                    "Saved",
+                    "Settings saved. Restart the hotkey helper for hotkey changes to take effect.",
+                )
+            return
 
         QMessageBox.information(self, "Saved", "Settings saved.")
 
