@@ -271,8 +271,21 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Screen Error", "Unable to access display.")
             return
 
-        screenshot = screen.grabWindow(0)
-        self._overlay = SnipOverlay(screenshot, screen.geometry())
+        screen_geometry = screen.geometry()
+        screenshot = screen.grabWindow(
+            0,
+            screen_geometry.x(),
+            screen_geometry.y(),
+            screen_geometry.width(),
+            screen_geometry.height(),
+        )
+        if screenshot.isNull():
+            self.show_and_raise()
+            self.scan_notes.setPlainText("Unable to capture the selected display.")
+            QMessageBox.warning(self, "Screen Error", "Unable to capture the selected display.")
+            return
+
+        self._overlay = SnipOverlay(screenshot, screen_geometry)
         self._overlay.snip_captured.connect(self.handle_snip_image)
         self._overlay.snip_cancelled.connect(self.handle_snip_cancel)
         self._overlay.show()
@@ -285,6 +298,7 @@ class MainWindow(QMainWindow):
 
     def handle_snip_image(self, image) -> None:
         self.show_and_raise()
+        self.scan_notes.setPlainText("Snip captured. Decoding QR...")
 
         decoded = decode_qr_from_qimage(image)
         if not decoded:
