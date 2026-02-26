@@ -64,11 +64,36 @@ If you are following the build/developer steps below, creating a venv is require
 
 ### Python Dependencies
 
-From `QrScreenReader` folder:
+1. Open PowerShell.
+2. Go to the project folder:
+
+```powershell
+cd path\to\LingMoldyEnterprises\QrScreenReader
+```
+
+3. Create the virtual environment:
 
 ```powershell
 py -3.11 -m venv .venv
+```
+
+4. Activate the virtual environment:
+
+PowerShell:
+
+```powershell
 .\.venv\Scripts\Activate.ps1
+```
+
+Command Prompt (`cmd.exe`):
+
+```bat
+.\.venv\Scripts\activate.bat
+```
+
+5. Install Python dependencies:
+
+```powershell
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python -m pip install pyinstaller
