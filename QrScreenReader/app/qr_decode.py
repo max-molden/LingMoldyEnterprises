@@ -11,9 +11,11 @@ def qimage_to_cv(image: QImage) -> np.ndarray:
     rgb = image.convertToFormat(QImage.Format.Format_RGB888)
     width = rgb.width()
     height = rgb.height()
+    bytes_per_line = rgb.bytesPerLine()
     ptr = rgb.bits()
-    arr = np.frombuffer(ptr, dtype=np.uint8)
-    arr = arr.reshape((height, width, 3))
+    ptr.setsize(height * bytes_per_line)
+    arr = np.frombuffer(ptr, dtype=np.uint8).reshape((height, bytes_per_line))
+    arr = arr[:, : width * 3].reshape((height, width, 3))
     return cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
 
 
