@@ -13,8 +13,10 @@ def qimage_to_cv(image: QImage) -> np.ndarray:
     height = rgb.height()
     bytes_per_line = rgb.bytesPerLine()
     ptr = rgb.bits()
-    ptr.setsize(height * bytes_per_line)
-    arr = np.frombuffer(ptr, dtype=np.uint8).reshape((height, bytes_per_line))
+    buffer = ptr if isinstance(ptr, memoryview) else memoryview(ptr)
+    arr = np.frombuffer(buffer, dtype=np.uint8, count=height * bytes_per_line).reshape(
+        (height, bytes_per_line)
+    )
     arr = arr[:, : width * 3].reshape((height, width, 3))
     return cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
 
