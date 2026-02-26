@@ -5,7 +5,7 @@ import subprocess
 import webbrowser
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QThread, Qt, Signal
 from PySide6.QtGui import QAction, QCursor, QGuiApplication
 from PySide6.QtWidgets import (
     QApplication,
@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QPushButton,
+    QProgressBar,
     QStyle,
     QSystemTrayIcon,
     QTextEdit,
@@ -33,6 +34,23 @@ from .qr_decode import decode_qr_from_qimage
 from .safety import analyze_url
 from .snip_overlay import SnipOverlay
 from .win_integration import is_hotkey_helper_running, signal_hotkey_helper_reload
+
+
+class DecodeThread(QThread):
+    decoded = Signal(object)
+    failed = Signal(str)
+
+    def __init__(self, image, parent=None) -> None:
+        super().__init__(parent)
+        self._image = image.copy()
+
+    def run(self) -> None:
+        try:
+            result = decode_qr_from_qimage(self._image)
+        except Exception as exc:  # pragma: no cover - defensive error boundary
+            self.failed.emit(str(exc))
+            return
+        self.decoded.emit(result)
 
 
 class MainWindow(QMainWindow):
@@ -53,6 +71,7 @@ class MainWindow(QMainWindow):
         self._cli_hotkey_override = hotkey_override
         self._cli_disable_hotkey = disable_hotkey
         self._helper_running = is_hotkey_helper_running()
+        self._decode_thread: DecodeThread | None = None
 
         self.hotkey_listener = GlobalHotkeyListener(self._effective_hotkey())
         self.hotkey_listener.triggered.connect(self.start_snip_from_hotkey)
@@ -107,6 +126,11 @@ class MainWindow(QMainWindow):
         self.scan_notes.setReadOnly(True)
         self.scan_notes.setFixedHeight(110)
         result_layout.addWidget(self.scan_notes)
+
+        self.decode_progress = QProgressBar()
+        self.decode_progress.setRange(0, 0)
+        self.decode_progress.setVisible(False)
+        result_layout.addWidget(self.decode_progress)
 
         result_actions = QHBoxLayout()
         self.copy_btn = QPushButton("Copy")
@@ -263,6 +287,9 @@ class MainWindow(QMainWindow):
 
     def start_snip(self, hotkey_triggered: bool = False) -> None:
         del hotkey_triggered  # Behavior is now consistent for button, tray, and hotkey launch.
+        if self._decode_thread and self._decode_thread.isRunning():
+            self.scan_notes.setPlainText("Please wait for current decode to finish.")
+            return
         self.hide()
 
         QApplication.processEvents()
@@ -299,8 +326,15 @@ class MainWindow(QMainWindow):
     def handle_snip_image(self, image) -> None:
         self.show_and_raise()
         self.scan_notes.setPlainText("Snip captured. Decoding QR...")
+        self._set_decode_busy(True)
+        self._decode_thread = DecodeThread(image, self)
+        self._decode_thread.decoded.connect(self._on_decode_finished)
+        self._decode_thread.failed.connect(self._on_decode_failed)
+        self._decode_thread.finished.connect(self._on_decode_thread_finished)
+        self._decode_thread.start()
 
-        decoded = decode_qr_from_qimage(image)
+    def _on_decode_finished(self, decoded: str | None) -> None:
+        self._set_decode_busy(False)
         if not decoded:
             self.url_field.clear()
             self.scan_notes.setPlainText("No QR code could be detected in the selected area.")
@@ -330,6 +364,25 @@ class MainWindow(QMainWindow):
                 self.open_current_link()
             else:
                 self.confirm_and_open_unsafe(decoded, safety_notes)
+
+    def _on_decode_failed(self, error: str) -> None:
+        self._set_decode_busy(False)
+        self.url_field.clear()
+        self.scan_notes.setPlainText(f"Decode failed: {error}")
+        QMessageBox.warning(self, "Decode Error", f"QR decode failed: {error}")
+
+    def _on_decode_thread_finished(self) -> None:
+        self._decode_thread = None
+
+    def _set_decode_busy(self, busy: bool) -> None:
+        self.decode_progress.setVisible(busy)
+        self.snip_btn.setEnabled(not busy)
+        self.decode_file_btn.setEnabled(not busy)
+        if busy:
+            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        else:
+            while QApplication.overrideCursor() is not None:
+                QApplication.restoreOverrideCursor()
 
     def decode_from_file(self) -> None:
         file_path, _ = QFileDialog.getOpenFileName(

@@ -19,6 +19,11 @@ def qimage_to_cv(image: QImage) -> np.ndarray:
 
 def decode_qr_from_qimage(image: QImage) -> Optional[str]:
     frame = qimage_to_cv(image)
+    max_dim = max(frame.shape[0], frame.shape[1])
+    if max_dim > 1800:
+        scale = 1800.0 / float(max_dim)
+        frame = cv2.resize(frame, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+
     detector = cv2.QRCodeDetector()
 
     data, points, _ = detector.detectAndDecode(frame)
