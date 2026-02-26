@@ -16,3 +16,6 @@
 14. Configure each PR so it completes automatically after required checks and approval, with remote branch auto-deletion enabled.
 15. At the start of the next work session, if a local feature branch is already merged/closed ("dead"), delete the local branch during cleanup.
 16. If the user says work is an entirely new project, create it in a new folder; if there is any uncertainty, ask the user to confirm before proceeding.
+17. Keep automated secret scanning enabled in CI, and do not bypass or silence secret-scan failures without user approval.
+18. If runtime secrets are needed, store them only in local ignored files (for example `.env` or files under `secrets/`), and document required keys in a tracked template file (for example `.env.example`) without real values.
+19. When introducing a secret-dependent feature, add startup validation with clear error messages so missing local secrets fail fast and explain how to provide them.

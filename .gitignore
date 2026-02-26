@@ -25,3 +25,10 @@ bin/
 
 # SSH key directories
 **/.ssh/
+
+# Local secrets (never commit)
+.env
+.env.*
+!.env.example
+secrets/*
+!secrets/.gitkeep
