@@ -10,6 +10,7 @@ Desktop app to scan QR codes from a selected screen region.
 4. Finish install.
 
 No Python/CMake/dev tools are needed for end users.
+No virtual environment is needed when using the installer.
 
 ## Features
 
@@ -52,6 +53,7 @@ No Python/CMake/dev tools are needed for end users.
 ## Build Safely (Developer)
 
 Use a dedicated virtual environment.
+If you are following the build/developer steps below, creating a venv is required.
 
 ### Build Dependencies (Windows)
 
