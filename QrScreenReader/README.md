@@ -4,7 +4,7 @@ Desktop app to scan QR codes from a selected screen region.
 
 ## End-User Quick Start (2-3 minutes)
 
-1. Download `QRScreenReaderInstaller.exe` from the [GitHub Release assets page](https://github.com/max-molden/LingMoldyEnterprises/releases).
+1. Download `QRScreenReaderInstaller.exe` from the [GitHub Release assets page](https://github.com/max-molden/LingMoldyEnterprises/releases) when a release is published; otherwise build it via the **Build Installer** section below.
 2. Run installer and accept UAC prompt.
 3. Keep "Enable always-on native global hotkey launcher" checked if you want `Win+Shift+Q` to work system-wide after sign-in.
 4. Finish install.
