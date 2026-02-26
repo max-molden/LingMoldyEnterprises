@@ -57,7 +57,7 @@ If you are following the build/developer steps below, creating a venv is require
 
 ### Build Dependencies (Windows)
 
-1. Python 3.11+
+1. Python 3.11+ (Python 3.13 is also acceptable)
 2. CMake 3.16+
 3. Visual Studio Build Tools 2022 (Desktop development with C++)
 4. Inno Setup 6
@@ -71,13 +71,35 @@ If you are following the build/developer steps below, creating a venv is require
 cd path\to\LingMoldyEnterprises\QrScreenReader
 ```
 
-3. Create the virtual environment:
+3. Check available Python versions:
+
+```powershell
+py -0
+```
+
+4. Create the virtual environment with any installed Python version that is `3.11` or newer.
+
+Examples:
+
+```powershell
+py -3.13 -m venv .venv
+```
+
+or:
 
 ```powershell
 py -3.11 -m venv .venv
 ```
 
-4. Activate the virtual environment:
+or use your current default Python 3 launcher target:
+
+```powershell
+py -3 -m venv .venv
+```
+
+If dependency installation fails on 3.13+, recreate the venv with 3.11.
+
+5. Activate the virtual environment:
 
 PowerShell:
 
@@ -91,7 +113,7 @@ Command Prompt (`cmd.exe`):
 .\.venv\Scripts\activate.bat
 ```
 
-5. Install Python dependencies:
+6. Install Python dependencies:
 
 ```powershell
 python -m pip install --upgrade pip
