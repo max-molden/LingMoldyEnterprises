@@ -6,7 +6,7 @@ import webbrowser
 from pathlib import Path
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QGuiApplication
+from PySide6.QtGui import QAction, QCursor, QGuiApplication
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -262,22 +262,25 @@ class MainWindow(QMainWindow):
         self.start_snip(hotkey_triggered=True)
 
     def start_snip(self, hotkey_triggered: bool = False) -> None:
-        if hotkey_triggered:
-            self.hide()
+        del hotkey_triggered  # Behavior is now consistent for button, tray, and hotkey launch.
+        self.hide()
 
         QApplication.processEvents()
-        screen = QGuiApplication.primaryScreen()
+        screen = QGuiApplication.screenAt(QCursor.pos()) or QGuiApplication.primaryScreen()
         if not screen:
-            QMessageBox.critical(self, "Screen Error", "Unable to access primary screen.")
+            QMessageBox.critical(self, "Screen Error", "Unable to access display.")
             return
 
         screenshot = screen.grabWindow(0)
-        self._overlay = SnipOverlay(screenshot)
+        self._overlay = SnipOverlay(screenshot, screen.geometry())
         self._overlay.snip_captured.connect(self.handle_snip_image)
         self._overlay.snip_cancelled.connect(self.handle_snip_cancel)
         self._overlay.show()
+        self._overlay.raise_()
+        self._overlay.activateWindow()
 
     def handle_snip_cancel(self) -> None:
+        self.scan_notes.setPlainText("Snip cancelled.")
         self.show_and_raise()
 
     def handle_snip_image(self, image) -> None:

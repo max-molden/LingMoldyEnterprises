@@ -9,9 +9,10 @@ class SnipOverlay(QWidget):
     snip_captured = Signal(object)
     snip_cancelled = Signal()
 
-    def __init__(self, screen_shot: QPixmap) -> None:
+    def __init__(self, screen_shot: QPixmap, screen_geometry: QRect) -> None:
         super().__init__()
         self._screen_shot = screen_shot
+        self._screen_geometry = screen_geometry
         self._start = QPoint()
         self._end = QPoint()
         self._selecting = False
@@ -19,7 +20,7 @@ class SnipOverlay(QWidget):
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint, True)
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
         self.setWindowFlag(Qt.WindowType.Tool, True)
-        self.setWindowState(Qt.WindowState.WindowFullScreen)
+        self.setGeometry(self._screen_geometry)
         self.setCursor(Qt.CursorShape.CrossCursor)
 
     def paintEvent(self, event) -> None:
