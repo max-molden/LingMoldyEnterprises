@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(QRHotkeyHelper LANGUAGES CXX)
 
-add_executable(QRHotkeyHelper QRHotkeyHelper.cpp)
+add_executable(QRHotkeyHelper WIN32 QRHotkeyHelper.cpp)
 target_compile_features(QRHotkeyHelper PRIVATE cxx_std_17)
 target_link_libraries(QRHotkeyHelper PRIVATE user32 shell32)
 
