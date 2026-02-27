@@ -84,22 +84,33 @@ class GlobalHotkeyListener(QObject):
         self._running = threading.Event()
         self._thread_id: int | None = None
         self._hotkey = hotkey
+        self._state_lock = threading.Lock()
 
     def set_hotkey(self, hotkey: str) -> None:
         self._hotkey = hotkey
 
     def start(self) -> None:
-        if self._thread and self._thread.is_alive():
-            return
+        with self._state_lock:
+            if self._thread and self._thread.is_alive():
+                return
 
-        self._running.set()
-        self._thread = threading.Thread(target=self._run_loop, daemon=True)
-        self._thread.start()
+            self._running.set()
+            self._thread = threading.Thread(target=self._run_loop, daemon=True)
+            self._thread.start()
 
     def stop(self) -> None:
-        self._running.clear()
-        if self._thread_id:
-            user32.PostThreadMessageW(self._thread_id, WM_QUIT, 0, 0)
+        thread_to_join: threading.Thread | None = None
+        thread_id: int | None = None
+        with self._state_lock:
+            self._running.clear()
+            thread_id = self._thread_id
+            thread_to_join = self._thread
+
+        if thread_id:
+            user32.PostThreadMessageW(thread_id, WM_QUIT, 0, 0)
+
+        if thread_to_join and thread_to_join.is_alive() and thread_to_join is not threading.current_thread():
+            thread_to_join.join(timeout=1.0)
 
     def _run_loop(self) -> None:
         self._thread_id = kernel32.GetCurrentThreadId()
@@ -127,3 +138,7 @@ class GlobalHotkeyListener(QObject):
                 user32.DispatchMessageW(ctypes.byref(msg))
         finally:
             user32.UnregisterHotKey(None, HOTKEY_ID)
+            with self._state_lock:
+                self._thread_id = None
+                if self._thread is threading.current_thread():
+                    self._thread = None

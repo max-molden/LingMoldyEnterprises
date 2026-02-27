@@ -123,6 +123,8 @@ python -m pip install pyinstaller
 
 ## Run in Development
 
+From `QrScreenReader` folder, with your virtual environment activated:
+
 ```bat
 run_dev.bat
 ```
@@ -206,7 +208,7 @@ To let users install in minutes:
   - Re-run installer and enable "always-on native global hotkey launcher".
   - Ensure no other app owns the same hotkey.
 - Hotkey changed in app settings but helper still uses old one:
-  - Open app settings and save again; app signals helper reload automatically.
+  - Open app settings and save once; the app signals helper reload automatically.
 
 ## Notes
 

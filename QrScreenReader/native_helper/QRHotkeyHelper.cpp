@@ -248,6 +248,19 @@ std::wstring GetExecutableDir() {
     return full.substr(0, pos);
 }
 
+bool FileExists(const std::wstring& path) {
+    DWORD attrs = GetFileAttributesW(path.c_str());
+    return attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY) == 0;
+}
+
+std::wstring ParentDir(const std::wstring& path) {
+    size_t pos = path.find_last_of(L"\\/");
+    if (pos == std::wstring::npos) {
+        return L"";
+    }
+    return path.substr(0, pos);
+}
+
 void LaunchSnipWindow() {
     std::wstring dir = GetExecutableDir();
     if (dir.empty()) {
@@ -256,7 +269,24 @@ void LaunchSnipWindow() {
 
     std::wstring app = dir + L"\\QRScreenReader.exe";
     std::wstring args = L"--mode snip --disable-hotkey";
-    ShellExecuteW(nullptr, L"open", app.c_str(), args.c_str(), dir.c_str(), SW_SHOWNORMAL);
+    if (FileExists(app)) {
+        ShellExecuteW(nullptr, L"open", app.c_str(), args.c_str(), dir.c_str(), SW_SHOWNORMAL);
+        return;
+    }
+
+    // Dev fallback: helper may run from QrScreenReader\build-helper while app runs via run_dev.bat.
+    std::wstring project_dir = ParentDir(dir);
+    if (project_dir.empty()) {
+        return;
+    }
+
+    std::wstring run_dev = project_dir + L"\\run_dev.bat";
+    if (!FileExists(run_dev)) {
+        return;
+    }
+
+    std::wstring cmd_args = L"/c \"\"" + run_dev + L"\" --mode snip --disable-hotkey\"";
+    ShellExecuteW(nullptr, L"open", L"cmd.exe", cmd_args.c_str(), project_dir.c_str(), SW_SHOWNORMAL);
 }
 
 bool RegisterConfiguredHotkey(const AppConfig& cfg, bool& registered) {
