@@ -126,6 +126,13 @@ python -m pip install pyinstaller
 From `QrScreenReader` folder, with your virtual environment activated:
 
 ```bat
+build_helper.bat
+```
+
+This builds `QRHotkeyHelper.exe` for the always-on global hotkey path in development.
+If the helper is running, `Win+Shift+Q` can trigger snip mode even when the main app window is not running.
+
+```bat
 run_dev.bat
 ```
 
