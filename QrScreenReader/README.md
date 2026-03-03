@@ -142,6 +142,21 @@ Direct snip launch:
 run_dev.bat --mode snip
 ```
 
+## Clean Development Artifacts
+
+From `QrScreenReader` folder:
+
+```bat
+clean_dev.bat
+```
+
+This script:
+
+- Stops `QRHotkeyHelper.exe` and `QRScreenReader.exe` if running.
+- Removes local build artifacts (`build-helper`, `build`, `dist`, `*.spec`, `__pycache__`).
+- Removes local app data at `%APPDATA%\\QrScreenReader`.
+- Removes the Startup shortcut for the native helper if present.
+
 ## Command Line Arguments
 
 ```text
