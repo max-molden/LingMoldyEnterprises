@@ -123,18 +123,24 @@ python -m pip install pyinstaller
 
 ## Run in Development
 
-From `QrScreenReader` folder, with your virtual environment activated:
+From `QrScreenReader` folder:
 
 ```bat
 build_helper.bat
 ```
 
+Virtual environment: **not required** for this command (native C++ build only).
+
 This builds `QRHotkeyHelper.exe` for the always-on global hotkey path in development.
 If the helper is running, `Win+Shift+Q` can trigger snip mode even when the main app window is not running.
+
+Then activate your virtual environment and run:
 
 ```bat
 run_dev.bat
 ```
+
+Virtual environment: **required** for this command (`python -m app.main`).
 
 Direct snip launch:
 
@@ -170,11 +176,13 @@ This script:
 
 ## Build Windows Executable Bundle
 
-From `QrScreenReader` folder:
+From `QrScreenReader` folder, with your virtual environment activated:
 
 ```bat
 build_exe.bat
 ```
+
+Virtual environment: **required** for this command (`pyinstaller` + Python deps).
 
 This builds:
 
@@ -183,8 +191,12 @@ This builds:
 
 ## Build Installer
 
+Prerequisite: run `build_exe.bat` first (in activated venv) so `dist\\QRScreenReader\\*` exists.
+
 1. Open `installer/QRScreenReader.iss` in Inno Setup Compiler.
 2. Build.
+
+Virtual environment: **not required** for Inno Setup compile step.
 
 Output:
 
@@ -211,7 +223,7 @@ The installer shows `installer/UAC_INFO.txt` before installation, explaining:
 
 To let users install in minutes:
 
-1. Build executable bundle with `build_exe.bat`.
+1. Activate venv and build executable bundle with `build_exe.bat`.
 2. Build installer from `installer/QRScreenReader.iss`.
 3. Create a GitHub Release.
 4. Upload `QRScreenReaderInstaller.exe` as a release asset.
