@@ -47,6 +47,7 @@ No virtual environment is needed when using the installer.
 - `app/config.py`: config load/save
 - `native_helper/QRHotkeyHelper.cpp`: native always-on hotkey helper
 - `build_exe.bat`: build Python app + native helper
+- `build_installer.bat`: build Python app + native helper + Inno Setup installer
 - `build_helper.bat`: build native helper only
 - `installer/QRScreenReader.iss`: Inno Setup installer script
 
@@ -191,12 +192,14 @@ This builds:
 
 ## Build Installer
 
-Prerequisite: run `build_exe.bat` first (in activated venv) so `dist\\QRScreenReader\\*` exists.
+From `QrScreenReader` folder, with your virtual environment activated:
 
-1. Open `installer/QRScreenReader.iss` in Inno Setup Compiler.
-2. Build.
+```bat
+build_installer.bat
+```
 
-Virtual environment: **not required** for Inno Setup compile step.
+Virtual environment: **required** for this command because it runs `build_exe.bat` first.
+Inno Setup: **required** (`ISCC.exe` must be installed and discoverable via PATH or default install folder).
 
 Output:
 
@@ -224,7 +227,7 @@ The installer shows `installer/UAC_INFO.txt` before installation, explaining:
 To let users install in minutes:
 
 1. Activate venv and build executable bundle with `build_exe.bat`.
-2. Build installer from `installer/QRScreenReader.iss`.
+2. Build installer with `build_installer.bat`.
 3. Create a GitHub Release.
 4. Upload `QRScreenReaderInstaller.exe` as a release asset.
 
