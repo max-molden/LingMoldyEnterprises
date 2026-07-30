@@ -1,18 +1,39 @@
-# Workflow Rules (max-molden)
+# LingMoldyEnterprises Repository Workflow
 
-1. Use `Development` as the default base branch for new work.
-2. Always push feature branches and open PRs against `Development` by default.
-3. Before starting new work, check whether the prior PR is still open.
-4. If the prior PR is closed/merged, confirm with the user before creating a new branch.
-5. If a non-`Development` base seems better, explain why and confirm with the user before branching.
-6. Create commits, pushes, and PRs using the bot identity (`codex-max-molden`) for this repo.
-7. When creating PRs, always add `max-molden` as reviewer and assignee.
-8. After PR merge/close, ensure feature branches are cleaned up (remote auto-delete plus local cleanup).
-9. Do not install packages; tell the user exactly what to install instead.
-10. When switching back to `Development` (or finishing/closing a feature branch), always fetch and fast-forward/pull `Development` so future branches start from the latest base.
-11. After creating a PR, always enable auto-merge on that PR (use `gh pr merge --auto` with the standard merge method for this repo).
-12. Never merge work directly into local `Development`; all merges to `Development` must go through a PR.
-13. `max-molden` is the sole approver for this repo and the only person who can approve changes that land on `Development`.
-14. Configure each PR so it completes automatically after required checks and approval, with remote branch auto-deletion enabled.
-15. At the start of the next work session, if a local feature branch is already merged/closed ("dead"), delete the local branch during cleanup.
-16. If the user says work is an entirely new project, create it in a new folder; if there is any uncertainty, ask the user to confirm before proceeding.
+The home `/home/codex/AGENTS.md` is authoritative. This file adds only LingMoldyEnterprises-specific workflow.
+
+## Branches and pull requests
+
+- `Development` is the integration branch and current default work branch.
+- `main` is the stable release branch.
+- Create short-lived branches from `Development` using `feature/<name>`, `fix/<name>`, `refactor/<name>`, `docs/<name>`, `chore/<name>`, or `test/<name>`.
+- Create `hotfix/<name>` from `main` only for urgent production repairs.
+- All changes reach `Development` and `main` through pull requests.
+- Use the `codex-max-molden` bot identity for repository operations when configured.
+- Add `max-molden` as pull-request reviewer and assignee.
+- The user is the final approver. Do not merge or enable auto-merge without explicit user approval.
+
+## Validation
+
+Before opening or updating a pull request, run the repository's formatting, linting, type-checking, tests, production build, accessibility checks, and link/security checks when applicable. Validate changed behavior in a local or preview environment and add regression coverage for bug fixes.
+
+Do not bypass failed checks, secret scanning, or dependency/security warnings without explicit user approval.
+
+## Secrets and configuration
+
+- Never commit secrets or production credentials.
+- Keep runtime secrets in ignored local files or an approved secret manager.
+- Maintain a tracked `.env.example` or equivalent template with safe names and descriptions.
+- Add clear startup validation when a feature requires missing configuration.
+
+## Dependencies and documentation
+
+- Do not install packages automatically; report the exact command for the user to run when installation is required.
+- Keep lockfiles and runtime versions consistent.
+- Document setup, validation commands, architecture decisions, and deployment assumptions without duplicating the home policy.
+
+## Deployment and cleanup
+
+Before changing a live service, document the deployment path, preview validation, smoke checks, observability, and rollback path. Do not deploy from an unreviewed feature branch.
+
+After a pull request is merged or closed, fetch current remote state and remove the related local feature branch when safe. Preserve `Development` and `main`.
